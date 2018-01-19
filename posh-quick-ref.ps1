@@ -70,11 +70,14 @@ Get-Cluster "NewHosts" | Get-VMHost | Foreach { Stop-VMHostService -HostService 
 
 Get-Cluster "NewHosts" | Get-VMHost | Foreach { Stop-VMHostService -HostService ($_ | Get-VMHostService | Where { $_.Key -eq "TSM"} ) } -Confirm $false
 
-#Disable SSH for a single host Get-VMHost -Name HOSTNAME | Stop-VMHostService -HostService ($_ | Get-VMHostService | Where { $_.Key -eq "TSM-SSH" -and "TSM"} )
+#Disable SSH for a single host:
+  Get-VMHost -Name HOSTNAME | Stop-VMHostService -HostService ($_ | Get-VMHostService | Where { $_.Key -eq "TSM-SSH" -and "TSM"} )
 
-#Check running services on an ESXi host Get-VmHostService -VMHost
+#Check running services on an ESXi host: 
+  Get-VmHostService -VMHost
 
-#Export a host profile export-vmhostprofile -filepath C:\scripts\AdvHostSetting\HostProfiles -profile VDI-Cluster01 export-vmhostprofile -filepath C:\scripts\AdvHostSetting\HostProfiles -profile VDI-Cluster02 export-vmhostprofile -filepath C:\scripts\AdvHostSetting\HostProfiles -profile VDI-Cluster03-DEV export-vmhostprofile -filepath C:\scripts\AdvHostSetting\HostProfiles -profile
+#Export a host profile: 
+  export-vmhostprofile -filepath C:\scripts\AdvHostSetting\HostProfiles -profile VDI-Cluster01 export-vmhostprofile -filepath C:\scripts\AdvHostSetting\HostProfiles -profile VDI-Cluster02 export-vmhostprofile -filepath C:\scripts\AdvHostSetting\HostProfiles -profile VDI-Cluster03-DEV export-vmhostprofile -filepath C:\scripts\AdvHostSetting\HostProfiles -profile
 
 #Change file ext for multiple files in a directory Dir C:\scripts\AdvHostSetting\HostProfiles\ -recurse -include ".vpf" | Foreach-Object { Rename-Item $.FullName ((Join-Path $.DirectoryName $_.BaseName) + ".xml") -whatif} Dir C:\scripts\AdvHostSetting\HostProfiles\ -recurse -include ".vpf" | Foreach-Object { Rename-Item $.FullName ((Join-Path $.DirectoryName $_.BaseName) + ".xml") }
 
