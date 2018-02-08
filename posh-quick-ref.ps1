@@ -117,36 +117,50 @@ $vmcluster2 = Get-Cluster "VDI-Cluster02" | Get-VMHost | Get-VM $vmcluster3 = Ge
 #To see all Alarms configured to send to a certain email address along with triggers:
 Get-AlarmDefinition | Get-AlarmAction -ActionType SendEmail | Where-Object {$_.To -like ''} | Select AlarmDefinition,To,Trigger | ogv
 
-#To remove all SendEmail AlarmActions for a particular email address: Get-AlarmDefinition | Get-AlarmAction -ActionType SendEmail | where-object {$_.To -like ''} | Remove-AlarmAction
+#To remove all SendEmail AlarmActions for a particular email address: 
+Get-AlarmDefinition | Get-AlarmAction -ActionType SendEmail | where-object {$_.To -like ''} | Remove-AlarmAction
 
-#To quickly configure all vCenter alarms to send an email, use this snippet: Get-AlarmDefinition | New-AlarmAction -Email -To ''
+#To quickly configure all vCenter alarms to send an email, use this snippet: 
+Get-AlarmDefinition | New-AlarmAction -Email -To ''
 
-#To list all ESX Hosts and their Service console information: Get-VMHostNetworkAdapter | select VMhost, Name, IP, SubnetMask, Mac, PortGroupName, vMotionEnabled, mtu, FullDuplex, BitRatePerSec |ogv
+#To list all ESX Hosts and their Service console information: 
+Get-VMHostNetworkAdapter | select VMhost, Name, IP, SubnetMask, Mac, PortGroupName, vMotionEnabled, mtu, FullDuplex, BitRatePerSec |ogv
 
-#Check VMtools update status to verify if it is set to auto or manual Get-Cluster -Name VDI-Cluster03-DEV | Get-VM | Select Name,@{N="UpgradePolicy";E={$.Extensiondata.Config.Tools.toolsUpgradePolicy}} | ogv Get-Cluster -Name VDI-Cluster04-DEV2 | Get-VM | Select Name,@{N="UpgradePolicy";E={$.Extensiondata.Config.Tools.toolsUpgradePolicy}} | ogv
+#Check VMtools update status to verify if it is set to auto or manual 
+Get-Cluster -Name VDI-Cluster03-DEV | Get-VM | Select Name,@{N="UpgradePolicy";E={$.Extensiondata.Config.Tools.toolsUpgradePolicy}} | ogv Get-Cluster -Name VDI-Cluster04-DEV2 | Get-VM | Select Name,@{N="UpgradePolicy";E={$.Extensiondata.Config.Tools.toolsUpgradePolicy}} | ogv
 
-#Add a time server to ESXi hosts Add-VmHostNtpServer [-NtpServer] <String[]> [-VMHost] <VMHost[]> [-Server <VIServer[]>] [-WhatIf] [-Confirm] []
+#Add a time server to ESXi hosts 
+Add-VmHostNtpServer [-NtpServer] <String[]> [-VMHost] <VMHost[]> [-Server <VIServer[]>] [-WhatIf] [-Confirm] []
 
 #Adds the NTP server with a domain name "ntp-server-name.com" to the virtual machine hosts stored in the $host variable. Add-VmHostNtpServer -NtpServer "ntp-server-name.com" -VMHost $host
 
-#Adds the NTP server "ntp_rtc.appliedanalytics.com" to the virtual machine hosts pipelined through the Get-VMHost cmdlet. Add-VmHostNtpServer -NtpServer "" -VMHost (Get-VMHost) Add-VmHostNtpServer -NtpServer "", "" -VMHost (Get-VMHost)
+#Adds the NTP server "ntp_rtc.domain.com" to the virtual machine hosts pipelined through the Get-VMHost cmdlet. 
+Add-VmHostNtpServer -NtpServer "" -VMHost (Get-VMHost) Add-VmHostNtpServer -NtpServer "", "" -VMHost (Get-VMHost)
 
-#Get all ESXi hosts by name and export to a text document get-vmhost | Select-Object -Property name | Export-Csv RTCHosts.txt
+#Get all ESXi hosts by name and export to a text document 
+get-vmhost | Select-Object -Property name | Export-Csv RTCHosts.txt
 
-#Get list of all esxi hosts Get-Datacenter RTC-VDI-Datacenter | Get-VMHost | Format-Custom Get-Datacenter RTC-VDI-Datacenter | Get-VMHost | Out-GridView Get-Datacenter RTC-VDI-Datacenter | Get-VMHost | Get-Member Get-Cluster "RTC-VDI Cluster04-Dev" | Get-VMHost | Out-GridView
+#Get list of all esxi hosts 
+Get-Datacenter RTC-VDI-Datacenter | Get-VMHost | Format-Custom Get-Datacenter RTC-VDI-Datacenter | Get-VMHost | Out-GridView Get-Datacenter RTC-VDI-Datacenter | Get-VMHost | Get-Member Get-Cluster "RTC-VDI Cluster04-Dev" | Get-VMHost | Out-GridView
 
-#Connect to ESXi (connect-viserver) and run the following command: Get-View -ViewType HostSystem -Property Name, Config.Product | Select-Object Name,{$.Config.Product.FullName},{$.Config.Product.Build} | ft -auto
+#Connect to ESXi (connect-viserver) and run the following command: 
+Get-View -ViewType HostSystem -Property Name, Config.Product | Select-Object Name,{$.Config.Product.FullName},{$.Config.Product.Build} | ft -auto
 
-#View all hosts and their properties, and save the results to a file. Get-Datacenter RTC-VDI-Datacenter | Get-VMHost | Format-Custom | Out-File –FilePath hosts.txt
+#View all hosts and their properties, and save the results to a file. 
+Get-Datacenter RTC-VDI-Datacenter | Get-VMHost | Format-Custom | Out-File –FilePath hosts.txt
 
-#Capture HBA WWN of all ESXi Hosts in vCenter Get-VMHostHBA -Type FibreChannel | Select VMHost,Device,Type,PortWorldWideName | Get-VMHostHBA -Type FibreChannel | Select VMHost,Device,@{N="WWN";E={"{0:X}" -f $_.PortWorldWideName}} | ogv
+#Capture HBA WWN of all ESXi Hosts in vCenter 
+Get-VMHostHBA -Type FibreChannel | Select VMHost,Device,Type,PortWorldWideName | Get-VMHostHBA -Type FibreChannel | Select VMHost,Device,@{N="WWN";E={"{0:X}" -f $_.PortWorldWideName}} | ogv
 
-#List disconnected VMs Get-NetworkAdapter (get-vm | where {$.powerstate -eq “poweredon”}) | Where { $.connectionstate.connected -eq “$null” } | select parent, connectionstate
+#List disconnected VMs 
+Get-NetworkAdapter (get-vm | where {$.powerstate -eq “poweredon”}) | Where { $.connectionstate.connected -eq “$null” } | select parent, connectionstate
 
-#Get computer last logon. Convenient for linked clones since naming convention is unique per pool Get-ADComputer -filter {cn -like "VM"} -property cn,lastlogondate | select cn,lastlogondate
+#Get computer last logon. Convenient for linked clones since naming convention is unique per pool 
+Get-ADComputer -filter {cn -like "VM"} -property cn,lastlogondate | select cn,lastlogondate
 
 #Add presented Get-Cluster -Name VDI-Cluster04-Dev2 | Get-VMHost
 
 Get-SCSILun -VMhost “” -LunType Disk | Select CanonicalName,CapacityGB,runtimename
 
-#Get installed programs Get-Content -Path C:\scripts\LCCandidates_Sep142017.txt | ForEach-Object {Get-WmiObject -Class Win32_Product -ComputerName $} | Where-Object -FilterScript {$.Name -like ".NET Framework"} | Format-List -Property * | ogv
+#Get installed programs 
+Get-Content -Path C:\scripts\LCCandidates_Sep142017.txt | ForEach-Object {Get-WmiObject -Class Win32_Product -ComputerName $} | Where-Object -FilterScript {$.Name -like ".NET Framework"} | Format-List -Property * | ogv
