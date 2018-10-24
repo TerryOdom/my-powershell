@@ -1,0 +1,73 @@
+Import-Module ActiveDirectory
+
+# Set the number of days since last logon
+$DaysInactive = 90
+$InactiveDate = (Get-Date).Adddays(-($DaysInactive))
+
+#-------------------------------
+# CAPTURE TRANSACTION LOGS
+#-------------------------------
+
+Start-Transcript -Path "C:\scripts\ADCleanup_$((Get-Date).ToString('MM-dd-yyyy_hh-mm-ss')).log"
+Get-Date -format MM-dd-yyyy_hh-mm-ss
+
+#-------------------------------
+# FIND INACTIVE USERS - Get AD Users that haven't logged on or haven't logged on in xx days and are not Service Accounts
+#-------------------------------
+
+$Users = Get-ADUser -Filter { LastLogonDate -lt $InactiveDate -and Enabled -eq $true -and SamAccountName -notlike "*svc*" -and EmailAddress -like "*deloitte*" } -SearchBase "OU=USER,OU=DCI,DC=DCI,DC=local" -SearchScope SubTree -Properties * |
+ Where-Object {$_.DistinguishedName -notlike '*<OU DN GOES HERE>' -and $_.DistinguishedName -notlike '*<OU DN GOES HERE>' -and $_.DistinguishedName -notlike '*<OU DN GOES HERE>' -and $_.DistinguishedName -notlike '*<OU DN GOES HERE>'} |
+ Select-Object @{ Name="Username"; Expression={$_.SamAccountName} }, Name, EmailAddress, LastLogonDate, DistinguishedName
+
+# Quick Single User Test
+#$Users = Get-ADUser rsuthar -Properties * | Select-Object @{ Name="Username"; Expression={$_.SamAccountName} }, Name, EmailAddress, LastLogonDate, DistinguishedName
+
+#-------------------------------
+# REPORTING - Export results to CSV
+#-------------------------------
+
+$Users | Export-Csv C:\scripts\InactiveUsers_$((Get-Date).ToString('MM-dd-yyyy_hh-mm-ss')).csv -NoTypeInformation
+
+#-------------------------------
+# INACTIVE USER MANAGEMENT - Disable Inactive Users
+#-------------------------------
+
+ForEach ($Item in $Users){
+ $DistName = $Item.DistinguishedName
+  Disable-ADAccount -Identity $DistName
+  Get-ADUser -Filter { DistinguishedName -eq $DistName } | Select-Object @{ Name="Username"; Expression={$_.SamAccountName} }, Name, Enabled
+}
+
+#-------------------------------
+# EMAIL USER MANAGEMENT
+#-------------------------------
+
+#ForEach ($Item in $Users){
+#$DistName = $Item.DistinguishedName
+ #$to = $Item.EmailAddress
+ #$from = 'noreply@mail.com'
+ #$lastlogin = $Item.LastLogonDate
+ #$body = Get-Content C:\Scripts\InactiveUsersEmailBody.html -Raw
+ #$Account = $Item.Username
+ #Send-MailMessage -To $to -From $from -Subject "Your DCI\$Account account has been inactive since $lastlogin" –Body $body -BodyAsHtml -SmtpServer "smtp.deloitteinnovation.us"
+ #Write-Output " User: $($Item.Username) - Emailed $to"
+ #}
+
+#-------------------------------
+# DELETE INACTIVE USERS
+#-------------------------------
+
+#ForEach ($Item in $Users){
+#  Remove-ADUser -Identity $Item.DistinguishedName -Confirm:$false
+#  Write-Output "$($Item.Username) - Deleted"
+#}
+
+#-------------------------------
+# GATHER & SEND TRANSACTION LOGS
+#-------------------------------
+
+Get-Date -format MM-dd-yyyy_hh-mm-ss
+Stop-Transcript
+
+$log = Get-ChildItem -Filter *.log C:\scripts | select -last 1
+Send-MailMessage -To "user1@email.com", "user2@email.com" -From noreply@email.com -Subject "DCI ActiveDirectory Cleanup Script was completed" -Attachments C:\scripts\$log -Body "Log attached" -SmtpServer "smtp.deloitteinnovation.us"
