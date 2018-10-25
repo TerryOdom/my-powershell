@@ -15,7 +15,7 @@ Get-Date -format MM-dd-yyyy_hh-mm-ss
 # FIND INACTIVE USERS - Get AD Users that haven't logged on or haven't logged on in xx days and are not Service Accounts
 #-------------------------------
 
-$Users = Get-ADUser -Filter { LastLogonDate -lt $InactiveDate -and Enabled -eq $true -and SamAccountName -notlike "*svc*" -and EmailAddress -like "*deloitte*" } -SearchBase "OU=USER,OU=DCI,DC=DCI,DC=local" -SearchScope SubTree -Properties * |
+$Users = Get-ADUser -Filter { LastLogonDate -lt $InactiveDate -and Enabled -eq $true -and SamAccountName -notlike "*svc*" -and EmailAddress -like "*deloitte*" } -SearchBase "<OU DN GOES HERE>" -SearchScope SubTree -Properties * |
  Where-Object {$_.DistinguishedName -notlike '*<OU DN GOES HERE>' -and $_.DistinguishedName -notlike '*<OU DN GOES HERE>' -and $_.DistinguishedName -notlike '*<OU DN GOES HERE>' -and $_.DistinguishedName -notlike '*<OU DN GOES HERE>'} |
  Select-Object @{ Name="Username"; Expression={$_.SamAccountName} }, Name, EmailAddress, LastLogonDate, DistinguishedName
 
